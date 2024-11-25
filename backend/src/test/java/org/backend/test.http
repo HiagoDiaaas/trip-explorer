@@ -1,0 +1,50 @@
+GET http://localhost:8080/api/v1/trips/5
+Content-Type: application/json
+
+### Signup: Register a New User
+POST http://localhost:4000/auth/signup
+Content-Type: application/json
+
+{
+  "email": "test",
+  "password": "password123",
+  "role": "Admin",
+  "name": "test"
+}
+
+### Signin: Authenticate the User and Get JWT Token
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+  "email": "test",
+  "password": "password123"
+}
+
+### Signin: Authenticate the User and Get JWT Token
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+  "email": "sam@g.com",
+  "password": "sam"
+}
+
+
+###
+GET http://localhost:4000/api/v1/trips
+#Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxLHRlc3R1c2VyQGdtYWlsLmNvbSxBZG1pbiIsImlhdCI6MTcyOTY5NjY4MywiZXhwIjoxNzI5Njk2ODYzLCJpc3MiOiJNSVUifQ.OGt941JF3zqLuY3SH0JNcy5pi1DOSfXGgOJ2Otx1cPs
+
+
+### Post trip
+POST http://localhost:4000/api/v1/trips
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzLHNhbUBnLmNvbSxBZG1pbiIsImlhdCI6MTcyOTcyNDUwOCwiZXhwIjoxNzI5NzI2MzA4LCJpc3MiOiJNSVUifQ.xg9pBqjjkdD_q5q5Npk82YcNDd6ArXzY0sipp_QRn20
+
+{
+  "country": "Uganda",
+  "airport": "ebbs",
+  "hotel": "speake",
+  "galleryImages": ["hello"]
+}
+

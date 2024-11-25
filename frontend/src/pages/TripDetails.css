@@ -1,0 +1,19 @@
+.container {
+  margin: 20px 60px;
+  flex: 1;
+}
+
+.content {
+  display: flex;
+  gap: 30px;
+}
+
+.gallery {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+span {
+  font-weight: bold;
+}
