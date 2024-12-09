@@ -49,7 +49,7 @@ public class TripServiceImpl implements TripService {
                 if (!imageUrl.isEmpty()) {
                     Gallery gallery = new Gallery();
                     gallery.setUrl(imageUrl);
-                    gallery.setTrip(trip); // Set the trip
+                    gallery.setTrip(trip);
                     galleries.add(gallery);
                 }
             }
@@ -67,5 +67,34 @@ public class TripServiceImpl implements TripService {
             throw new TripNotFoundException("Trip not found with id: " + tripId);
         }
         tripRepository.deleteById(tripId);
+    }
+
+    @Override
+    public TripResponse updateTrip(Long tripId, CreateTripRequest tripRequest) {
+        Trip existingTrip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new TripNotFoundException("Trip not found with id: " + tripId));
+
+        existingTrip.setCountry(tripRequest.getCountry());
+        existingTrip.setAirport(tripRequest.getAirport());
+        existingTrip.setHotel(tripRequest.getHotel());
+
+        List<Gallery> updatedGalleries = new ArrayList<>();
+        if (tripRequest.getGalleryImages() != null) {
+            for (String imageUrl : tripRequest.getGalleryImages()) {
+                if (!imageUrl.isEmpty()) {
+                    Gallery gallery = new Gallery();
+                    gallery.setUrl(imageUrl);
+                    gallery.setTrip(existingTrip);
+                    updatedGalleries.add(gallery);
+                }
+            }
+        }
+
+        existingTrip.getGallery().clear();
+        existingTrip.getGallery().addAll(updatedGalleries);
+
+        Trip updatedTrip = tripRepository.save(existingTrip);
+
+        return TripResponse.from(updatedTrip);
     }
 }
