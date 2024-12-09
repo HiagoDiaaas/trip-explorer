@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { findTripById, removeTrip } from "../features/trips/tripsSlice";
 
@@ -15,6 +15,8 @@ const TripDetails = ({ isLoggedIn }) => {
   const trip = useSelector((state) => state.trips.selectedTrip);
   const isLoading = useSelector((state) => state.trips.isLoading);
 
+  const [successMessage, setSuccessMessage] = useState("");
+
   useEffect(() => {
     dispatch(findTripById(parseInt(tripId)));
   }, [dispatch, tripId]);
@@ -28,7 +30,7 @@ const TripDetails = ({ isLoggedIn }) => {
         const response = await fetch(
           `http://localhost:4000/api/v1/trips/${tripId}`,
           {
-            method: "DELETE"
+            method: "DELETE",
           }
         );
 
@@ -51,6 +53,14 @@ const TripDetails = ({ isLoggedIn }) => {
         console.error("Error deleting trip:", error);
       }
     }
+  };
+
+  const handleEditTrip = () => {
+    navigate(`/trip/${tripId}/edit`);
+  };
+
+  const handleTripUpdated = () => {
+    setSuccessMessage("Trip was updated successfully.");
   };
 
   if (isLoading) return <div>Loading trip details...</div>;
@@ -84,13 +94,28 @@ const TripDetails = ({ isLoggedIn }) => {
                 variant="contained"
                 color="error"
                 onClick={handleDeleteTrip}
-                sx={{ mt: 2 }}>
+                sx={{ mt: 2, mr: 2 }}
+              >
                 Delete Trip
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleEditTrip}
+                sx={{ mt: 2 }}
+              >
+                Edit Trip
               </Button>
             </div>
           )}
         </div>
       </div>
+
+      {successMessage && (
+        <Typography sx={{ mt: 4, color: "green", textAlign: "center" }}>
+          {successMessage}
+        </Typography>
+      )}
 
       <div className="gallery">
         {trip.galleryImages && trip.galleryImages.length > 0 ? (
