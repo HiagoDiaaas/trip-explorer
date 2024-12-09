@@ -40,5 +40,11 @@ public class TripController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTrip(@PathVariable Long id, @RequestBody CreateTripRequest tripRequest) {
+        TripResponse updatedTrip = tripService.updateTrip(id, tripRequest);
+        return new ResponseEntity<>(updatedTrip, HttpStatus.OK);
+    }
+
 
 }

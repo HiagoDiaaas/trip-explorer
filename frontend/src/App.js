@@ -36,7 +36,7 @@ function App() {
           element={<TripDetails isLoggedIn={isLoggedIn} />}
         />
         <Route
-          path="/edit-trip/:tripId"
+          path="/trip/:tripId/edit"
           element={
             <PrivateRoute isLoggedIn={isLoggedIn}>
               <EditTrip />
