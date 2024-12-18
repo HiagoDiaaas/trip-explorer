@@ -21,6 +21,12 @@ public class User implements UserDetails {
     private String name;
     private String role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Favorite> favorites;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Note> notes;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(

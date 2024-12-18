@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import PrivateRoute from "./components/PrivateRoute";
 import "./components/Header.css";
 import AddGallery from "./pages/AddGallery";
+import FavoritesPage from "./pages/FavoritesPage";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -63,6 +64,15 @@ function App() {
           element={
             <PrivateRoute isLoggedIn={isLoggedIn}>
               <AddGallery />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/favorites"
+          element={
+            <PrivateRoute isLoggedIn={isLoggedIn}>
+              <FavoritesPage />
             </PrivateRoute>
           }
         />

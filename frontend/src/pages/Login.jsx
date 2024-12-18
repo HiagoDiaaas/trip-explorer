@@ -30,7 +30,13 @@ const Login = () => {
       if (response.ok) {
         setMessage("Login successful");
         setIsSuccess(true);
-        dispatch(setCredentials({ token: data.token, username: data.name }));
+
+        dispatch(setCredentials({ 
+          token: data.token, 
+          username: data.email,
+          userId: data.userId 
+        }));
+
         navigate("/");
       } else {
         setMessage(data.message || "Login failed");

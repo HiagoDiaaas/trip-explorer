@@ -24,4 +24,10 @@ public class Trip {
 
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Gallery> gallery = new ArrayList<>();
+
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Note> notes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Favorite> favorites = new ArrayList<>();
 }
