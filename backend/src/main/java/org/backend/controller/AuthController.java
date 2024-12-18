@@ -34,11 +34,10 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
             User user = (User) authentication.getPrincipal();
             String token = jwtTokenUtil.generateToken(user);
-            return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getName()));
+            return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getName(), user.getId())); 
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
     }
 
     @PostMapping("/signup")
