@@ -31,6 +31,7 @@ const Header = () => {
             <>
               <Link>Welcome, {name}!</Link>
               <Link to="/add-trip">Add Trip</Link>
+              <Link to="/favorites">Favorites</Link>
               <button onClick={handleLogout}>Logout</button>
             </>
           ) : (
