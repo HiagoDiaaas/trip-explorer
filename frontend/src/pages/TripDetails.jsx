@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, Typography } from "@mui/material";
+import { Button, Typography, TextField } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { findTripById, removeTrip } from "../features/trips/tripsSlice";
 import defaultImage from "../images/default.png";
@@ -21,6 +21,9 @@ const TripDetails = ({ isLoggedIn }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState(null);
+
+  const [notes, setNotes] = useState([]);
+  const [newNoteContent, setNewNoteContent] = useState("");
 
   useEffect(() => {
     dispatch(findTripById(parseInt(tripId)));
@@ -50,6 +53,28 @@ const TripDetails = ({ isLoggedIn }) => {
 
     fetchFavorites();
   }, [tripId, userId, token]);
+
+
+  useEffect(() => {
+    const fetchNotes = async () => {
+      if (userId && token && isLoggedIn) {
+        const response = await fetch(`http://localhost:4000/api/v1/notes/user/${userId}/trip/${tripId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setNotes(data);
+        } else {
+          console.error("Failed to fetch notes");
+        }
+      }
+    };
+
+    fetchNotes();
+  }, [tripId, userId, token, isLoggedIn]);
 
   const handleDeleteTrip = async () => {
     if (window.confirm("Are you sure you want to delete this trip?")) {
@@ -91,31 +116,10 @@ const TripDetails = ({ isLoggedIn }) => {
   };
 
   const toggleFavorite = async () => {
-    console.log("Toggle favorite called");
-    console.log("Trip ID:", tripId, "typeof:", typeof tripId);
-    console.log("User ID:", userId, "typeof:", typeof userId);
-    console.log("Token:", token);
-    console.log("Is Favorite:", isFavorite);
-    console.log("Favorite ID:", favoriteId);
-
     const parsedTripId = parseInt(tripId);
     const parsedUserId = parseInt(userId);
 
-    console.log("Parsed Trip ID:", parsedTripId, "typeof:", typeof parsedTripId);
-    console.log("Parsed User ID:", parsedUserId, "typeof:", typeof parsedUserId);
-
-    if (!parsedUserId || isNaN(parsedUserId)) {
-      alert("User ID is not valid. Check login response and ensure userId is a number.");
-      return;
-    }
-
-    if (!parsedTripId || isNaN(parsedTripId)) {
-      alert("Trip ID is not valid.");
-      return;
-    }
-
     if (isFavorite && favoriteId) {
-      // Remove from favorites
       const response = await fetch(`http://localhost:4000/api/v1/favorites/${favoriteId}/user/${parsedUserId}`, {
         method: "DELETE",
         headers: {
@@ -123,7 +127,6 @@ const TripDetails = ({ isLoggedIn }) => {
         }
       });
 
-      console.log("Remove from favorites response status:", response.status);
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error removing from favorites:", errorText);
@@ -135,8 +138,6 @@ const TripDetails = ({ isLoggedIn }) => {
       }
 
     } else {
-      // Add to favorites
-      console.log("Adding to favorites with body:", { tripId: parsedTripId, userId: parsedUserId });
       const response = await fetch(`http://localhost:4000/api/v1/favorites`, {
         method: "POST",
         headers: {
@@ -146,17 +147,61 @@ const TripDetails = ({ isLoggedIn }) => {
         body: JSON.stringify({ tripId: parsedTripId, userId: parsedUserId })
       });
 
-      console.log("Add to favorites response status:", response.status);
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error adding to favorites:", errorText);
         alert(`Failed to add to favorites: ${errorText}`);
       } else {
         const data = await response.json();
-        console.log("Successfully added to favorites:", data);
         setIsFavorite(true);
         setFavoriteId(data.id);
       }
+    }
+  };
+
+
+  const handleAddNote = async () => {
+    if (!userId || !token || !newNoteContent.trim()) {
+      alert("You must be logged in and note must not be empty.");
+      return;
+    }
+
+    const parsedTripId = parseInt(tripId);
+    const parsedUserId = parseInt(userId);
+
+    const response = await fetch(`http://localhost:4000/api/v1/notes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ tripId: parsedTripId, userId: parsedUserId, content: newNoteContent.trim() })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setNotes((prevNotes) => [...prevNotes, data]);
+      setNewNoteContent("");
+    } else {
+      alert("Failed to add note");
+    }
+  };
+
+  const handleDeleteNote = async (noteId) => {
+    if (!userId || !token) return;
+
+    const parsedUserId = parseInt(userId);
+    const response = await fetch(`http://localhost:4000/api/v1/notes/${noteId}/user/${parsedUserId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
+    } else {
+      alert("Failed to delete note");
     }
   };
 
@@ -181,8 +226,12 @@ const TripDetails = ({ isLoggedIn }) => {
 
         <div>
           <h1>{trip.country}</h1>
-          <p><span>Airport:</span> {trip.airport}</p>
-          <p><span>Hotel:</span> {trip.hotel}</p>
+          <p>
+            <span>Airport:</span> {trip.airport}
+          </p>
+          <p>
+            <span>Hotel:</span> {trip.hotel}
+          </p>
 
           {isLoggedIn && (
             <div style={{ marginTop: "16px" }}>
@@ -210,6 +259,49 @@ const TripDetails = ({ isLoggedIn }) => {
               >
                 {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
               </Button>
+            </div>
+          )}
+
+          {/* Notes Section */}
+          {isLoggedIn && (
+            <div style={{ marginTop: "30px" }}>
+              <h2>Notes</h2>
+              <TextField
+                label="Add a note"
+                fullWidth
+                multiline
+                minRows={2}
+                value={newNoteContent}
+                onChange={(e) => setNewNoteContent(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <Button variant="contained" color="success" onClick={handleAddNote}>
+                Add Note
+              </Button>
+
+              {notes.length > 0 ? (
+                <ul style={{ marginTop: "20px", listStyle: "none", padding: 0 }}>
+                  {notes.map((note) => (
+                    <li key={note.id} style={{ marginBottom: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <div style={{ flexGrow: 1 }}>
+                          {note.content}
+                        </div>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => handleDeleteNote(note.id)}
+                          sx={{ ml: 2 }}
+                        >
+                          Delete Note
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No notes yet.</p>
+              )}
             </div>
           )}
         </div>
